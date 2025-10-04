@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             EstoquesSeeder::class,
             ConsumosSeeder::class,
             ContratosSeeder::class,
+            EmployeesSeeder::class,
         ]);
     }
 }

@@ -7,6 +7,33 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Sobre o Projeto (SUPRIR EPI API)
+
+API em PHP (Laravel 12) para gestão de EPIs com controle de retirada por credenciais, regras por perfil/contrato, estoque por obra, relatórios e integração Power BI.
+
+### Endpoints principais
+- Autenticação: `POST /api/v1/auth/login`, `POST /api/v1/auth/logout`, `GET /api/v1/me`
+- Funcionários: `GET/POST/PUT/DELETE /api/v1/employees`
+- Estoque: `GET /api/v1/inventory?obra_id=...`
+- Retiradas/Devoluções: `POST /api/v1/issues`, `POST /api/v1/returns`
+- Relatórios: `GET /api/v1/reports/summary`, `GET /api/v1/reports/consumption`
+- Power BI: `GET /api/v1/powerbi/embed-config`
+
+### Setup rápido
+1. Requisitos: PHP 8.2+, SQLite (padrão) ou MySQL/Postgres, Composer, Node (para front opcional).
+2. Instalar deps: `composer install && npm install`
+3. Copiar `.env`: `cp .env.example .env` e ajustar `APP_KEY`, DB e variáveis `PBI_*` se usar Power BI.
+4. Banco: `php artisan migrate --seed`
+5. Rodar: `php artisan serve` e acessar `http://localhost:8000`.
+
+### Autenticação por token
+1. Login: `POST /api/v1/auth/login` com `{ email, password }`.
+2. Use o token Bearer nas chamadas seguintes: `Authorization: Bearer <token>`.
+
+### Semeadura inicial
+O seeder `DatabaseSeeder` cria usuário admin e dados de exemplo (obras, itens, estoques, consumos, contratos). Ajuste em `database/seeders` conforme necessidade.
+
+---
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
