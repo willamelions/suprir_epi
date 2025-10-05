@@ -7,6 +7,11 @@ use App\Http\Controllers\Api\IssueController;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\PowerBIController;
+use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\BudgetController;
+use App\Http\Controllers\Api\GoalController;
 
 Route::prefix('v1')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
@@ -29,5 +34,13 @@ Route::prefix('v1')->group(function () {
 
         // Power BI embedding
         Route::get('powerbi/embed-config', [PowerBIController::class, 'embedConfig']);
+        Route::get('powerbi/export/transactions.csv', [PowerBIController::class, 'exportDatasetCsv']);
+
+        // Finance Domain
+        Route::apiResource('accounts', AccountController::class);
+        Route::apiResource('categories', CategoryController::class);
+        Route::apiResource('transactions', TransactionController::class);
+        Route::apiResource('budgets', BudgetController::class);
+        Route::apiResource('goals', GoalController::class);
     });
 });
