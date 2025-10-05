@@ -4,46 +4,40 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryMove;
+use App\Services\ProjectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function summary(Request $request)
+    public function summary(Request $request, ProjectionService $projection)
     {
-        $obraId = $request->query('obra_id');
+        $user = $request->attributes->get('auth_user');
+        $month = $request->query('month');
+        $monthDate = $month ? Carbon::parse($month.'-01') : now()->startOfMonth();
 
-        $totalEstoque = DB::table('estoques')
-            ->when($obraId, fn($q) => $q->where('obra_id', $obraId))
-            ->sum('quantidade');
-
-        $totalIssues = InventoryMove::when($obraId, fn($q) => $q->where('obra_id', $obraId))
-            ->where('type', 'issue')
-            ->sum('quantity');
-
-        $totalReturns = InventoryMove::when($obraId, fn($q) => $q->where('obra_id', $obraId))
-            ->where('type', 'return')
-            ->sum('quantity');
+        $monthly = $projection->projectMonthlySpending($user->id, $monthDate);
+        $byCategory = $projection->projectBudgetByCategory($user->id, $monthDate);
 
         return [
-            'estoque_total' => (int) $totalEstoque,
-            'retiradas_total' => (int) $totalIssues,
-            'devolucoes_total' => (int) $totalReturns,
+            'monthly' => $monthly,
+            'budgets' => $byCategory,
         ];
     }
 
     public function consumption(Request $request)
     {
-        $obraId = $request->query('obra_id');
+        $user = $request->attributes->get('auth_user');
         $since = $request->query('since');
 
-        $query = InventoryMove::select('item_id', DB::raw('sum(quantity) as qty'))
-            ->where('type', 'issue')
-            ->when($obraId, fn($q) => $q->where('obra_id', $obraId))
-            ->when($since, fn($q) => $q->where('created_at', '>=', $since))
-            ->groupBy('item_id')
-            ->orderByDesc('qty')
-            ->with('item');
+        $query = DB::table('transactions')
+            ->select('category_id', DB::raw('SUM(amount) as spent'))
+            ->where('user_id', $user->id)
+            ->where('type', 'expense')
+            ->when($since, fn($q) => $q->where('occurred_on', '>=', $since))
+            ->groupBy('category_id')
+            ->orderByDesc('spent');
 
         return $query->get();
     }
